@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>All-in-One PDF & Image Tools — Bikanta Sarkar</title>
+  <meta name="description" content="Merge, split, compress, convert, edit and organize PDF & image files. Privacy-first, client-side where possible. Built by Bikanta Sarkar."/>
+  <meta name="author" content="Bikanta Sarkar" />
+  <link rel="canonical" href="/" />
+  <meta property="og:title" content="All-in-One PDF & Image Tools — Bikanta Sarkar" />
+  <meta property="og:description" content="Merge, split, compress, convert, edit and organize PDF and images. Privacy-first web apps with AdSense-ready slots." />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "name":"Bikanta Sarkar PDF & Image Tools",
+    "url":"/",
+    "author":{"@type":"Person","name":"Bikanta Sarkar"},
+    "description":"Tools to merge, split, compress, convert, edit and organize PDF and image files."
+  }
+  </script>
+
+  <!-- Styles -->
+  <style>
+    :root{
+      --bg: #f8fafc;
+      --card: #fff;
+      --accent1: #2563eb;
+      --accent2: #7c3aed;
+      --muted: #64748b;
+      --radius: 12px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:#0f172a;-webkit-font-smoothing:antialiased}
+    header{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:var(--card);box-shadow:0 2px 8px rgba(2,6,23,0.05)}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2));color:white;display:flex;align-items:center;justify-content:center;font-weight:700}
+    main{max-width:1200px;margin:20px auto;padding:18px;display:grid;grid-template-columns:320px 1fr;gap:18px}
+    @media(max-width:980px){main{grid-template-columns:1fr}}
+    nav.card{padding:12px;border-radius:var(--radius);background:var(--card);border:1px solid #eef2ff}
+    .tools-list{display:flex;flex-direction:column;gap:6px;max-height:66vh;overflow:auto;padding-right:6px}
+    .tool-btn{background:transparent;border:none;text-align:left;padding:10px;border-radius:8px;cursor:pointer;font-weight:600;color:#0f172a}
+    .tool-btn:hover{background:linear-gradient(90deg, rgba(37,99,235,0.06), rgba(124,58,237,0.04))}
+    .main-card{background:var(--card);border-radius:var(--radius);padding:14px;border:1px solid #eef2ff;box-shadow:0 6px 18px rgba(2,6,23,0.03)}
+    .row{display:flex;gap:12px;align-items:center}
+    .ad-slot{border-radius:10px;border:1px dashed #e6eef8;padding:12px;text-align:center;color:var(--muted);background:var(--card)}
+    .section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    input[type=file]{display:none}
+    .uploader{border:2px dashed #e6eef8;padding:14px;border-radius:10px;text-align:center}
+    .preview-list{display:grid;gap:10px;margin-top:12px}
+    .preview{display:flex;gap:12px;align-items:center;background:#fbfdff;padding:8px;border-radius:8px;border:1px solid #f1f5f9}
+    .preview img{width:84px;height:84px;object-fit:cover;border-radius:6px}
+    .btn{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+    .btn-secondary{background:#eef2ff;color:var(--accent1);padding:8px 10px;border-radius:8px;border:none;cursor:pointer}
+    .small{font-size:0.9rem;color:var(--muted)}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    footer{padding:18px;text-align:center;color:var(--muted);font-size:0.9rem}
+    .modal{position:fixed;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.45);z-index:60}
+    .modal-card{background:var(--card);padding:16px;border-radius:12px;width:940px;max-width:95%;max-height:90vh;overflow:auto}
+    .grid-pages{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+    .page-thumb{background:#fff;border-radius:8px;border:1px solid #eef2ff;padding:6px;cursor:grab}
+    .page-thumb img{width:100%;height:120px;object-fit:contain;border-radius:6px}
+    .muted{color:var(--muted)}
+    .flex{display:flex}
+    .gap{gap:8px}
+    .spaced{justify-content:space-between;align-items:center}
+    .notice{background:#fffbeb;padding:10px;border-radius:8px;border:1px solid #f5f0c5;color:#8a6d00}
+  </style>
+
+  <!-- External libraries -->
+  <!-- pdf-lib (create/modify PDFs) -->
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <!-- pdf.js for rendering pages to canvas (used for previews & pdf->jpg) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <!-- Sortable for drag-n-drop reordering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">B</div>
+      <div>
+        <div style="font-weight:700">Bikanta Sarkar</div>
+        <div style="font-size:0.9rem;color:var(--muted)">All-in-One PDF & Image Tools</div>
+      </div>
+    </div>
+    <div style="width:48%;max-width:520px"><div class="ad-slot" id="top-ad">Top Ad: <strong>ca-app-pub-4431035899447961/4471207019</strong></div></div>
+  </header>
+
+  <main>
+    <!-- left nav -->
+    <nav class="card">
+      <div class="section-title"><strong>Tools</strong><span class="small">Click to open</span></div>
+      <div class="tools-list" id="toolsList">
+        <!-- Buttons open modals or actions -->
+        <button class="tool-btn" data-tool="merge">1. Merge PDF</button>
+        <button class="tool-btn" data-tool="split">2. Split PDF</button>
+        <button class="tool-btn" data-tool="compressPdf">3. Compress PDF</button>
+        <button class="tool-btn" data-tool="organize">4. Organize PDF</button>
+        <button class="tool-btn" data-tool="repair">5. Repair PDF</button>
+        <button class="tool-btn" data-tool="convert">6. Convert to PDF</button>
+        <button class="tool-btn" data-tool="word2pdf">7. Word to PDF</button>
+        <button class="tool-btn" data-tool="ppt2pdf">8. PowerPoint to PDF</button>
+        <button class="tool-btn" data-tool="excel2pdf">9. Excel to PDF</button>
+        <button class="tool-btn" data-tool="jpg2pdf">10. JPG to PDF</button>
+        <button class="tool-btn" data-tool="image2pdf">11. Image to PDF</button>
+        <button class="tool-btn" data-tool="pdf2word">12. PDF to Word</button>
+        <button class="tool-btn" data-tool="pdf2ppt">13. PDF to PowerPoint</button>
+        <button class="tool-btn" data-tool="pdf2excel">14. PDF to Excel</button>
+        <button class="tool-btn" data-tool="pdf2jpg">15. PDF to JPG</button>
+        <button class="tool-btn" data-tool="pdfa">16. PDF/A</button>
+        <button class="tool-btn" data-tool="edit">17. Edit PDF</button>
+        <button class="tool-btn" data-tool="pageNumbers">18. Add Page Numbers</button>
+        <button class="tool-btn" data-tool="watermark">19. Add Watermark</button>
+        <button class="tool-btn" data-tool="rotate">20. Rotate PDF</button>
+        <button class="tool-btn" data-tool="annotate">21. Annotate PDF</button>
+        <button class="tool-btn" data-tool="protect">22. Protect PDF</button>
+        <button class="tool-btn" data-tool="unlock">23. Unlock PDF</button>
+        <button class="tool-btn" data-tool="scan">24. Scan to PDF</button>
+        <button class="tool-btn" data-tool="sign">25. PDF Sign</button>
+        <button class="tool-btn" data-tool="compare">26. Compare PDF</button>
+        <button class="tool-btn" data-tool="headersFooters">27. Headers/Footers</button>
+        <button class="tool-btn" data-tool="organizer">28. PDF Organizer</button>
+        <button class="tool-btn" data-tool="gdrive">29. Google Drive Integration</button>
+        <button class="tool-btn" data-tool="dropbox">30. Dropbox Integration</button>
+        <button class="tool-btn" data-tool="apps">31. Desktop & Mobile Apps</button>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="small muted">Note: Some conversions (PDF→Word/PPT/Excel, advanced repairs, secure signing) require a server or third-party API. Those buttons show instructions/placeholders to integrate later.</div>
+    </nav>
+
+    <!-- main area -->
+    <section class="main-card">
+      <div class="section-title">
+        <div>
+          <h2 style="margin:0">Image Compressor + PDF Tools</h2>
+          <div class="small muted">Client-side tools are privacy-friendly — files stay in your browser unless you explicitly upload them.</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn" id="openImageCompressor">Open Image Compressor</button>
+          <button class="btn-secondary" id="openPdfUploader">Open PDF Toolbox</button>
+        </div>
+      </div>
+
+      <!-- Image Compressor quick UI -->
+      <div id="imageCompressorPanel">
+        <div class="uploader" id="imgDrop">
+          <strong>Drag & drop images (PNG/JPG/WebP) or</strong>
+          <label for="imgFiles" class="btn" style="display:inline-block;margin-left:8px;cursor:pointer">Select files</label>
+          <input id="imgFiles" type="file" accept="image/*" multiple>
+          <div style="margin-top:10px" class="controls">
+            <label class="small">Quality: <span id="imgQVal">80</span>% <input id="imgQuality" type="range" min="10" max="100" value="80" style="vertical-align:middle"></label>
+            <label class="small"> Format:
+              <select id="imgFormat"><option value="original">Keep</option><option value="image/jpeg">JPEG</option><option value="image/webp">WebP</option></select>
+            </label>
+            <label class="small">Max width: <input id="imgMaxW" type="number" value="0" min="0" style="width:90px"></label>
+            <button class="btn" id="imgCompressAll">Compress All</button>
+          </div>
+        </div>
+        <div id="imgPreviewList" class="preview-list"></div>
+        <div id="imgOutputs" style="margin-top:12px"></div>
+      </div>
+
+      <hr style="margin:12px 0">
+
+      <!-- PDF quick actions -->
+      <div class="row spaced" style="margin-bottom:10px">
+        <div><strong>Quick PDF Actions</strong> <span class="small muted">(open PDF files to operate)</span></div>
+        <div class="row gap">
+          <label class="btn-secondary" style="padding:8px 10px;cursor:pointer">
+            <input id="pdfFiles" type="file" accept="application/pdf" multiple style="display:none">Choose PDFs
+          </label>
+          <button class="btn" id="mergeSelected">Merge Selected</button>
+          <button class="btn" id="openOrganizer">Open Organizer</button>
+        </div>
+      </div>
+
+      <div id="pdfStatus" class="small muted">No PDF loaded</div>
+      <div id="pdfPreviewArea" style="margin-top:12px"></div>
+    </section>
+  </main>
+
+  <footer>
+    © <span id="year"></span> Bikanta Sarkar — All Rights Reserved. • Privacy-first: client-side processing where possible.
+  </footer>
+
+  <!-- Modal container -->
+  <div id="modalRoot" style="display:none"></div>
+
+  <!-- AdSense scaffold (replace CA_PUB_ID with ca-pub-XXXXXXXXXXXXX to enable real ads) -->
+  <script>
+    // You provided ad unit; keep it here
+    const AD_UNIT = 'ca-app-pub-4431035899447961/4471207019';
+    let CA_PUB_ID = ''; // <-- SET YOUR AdSense publisher id here (ex: 'ca-pub-1234567890123456') after verifying site
+
+    function initAds(){
+      document.getElementById('top-ad').textContent = 'Ad slot — ' + AD_UNIT;
+      if(CA_PUB_ID){
+        // load official script
+        const s = document.createElement('script');
+        s.async=true; s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(CA_PUB_ID);
+        s.crossOrigin = 'anonymous';
+        document.head.appendChild(s);
+        // to show ad units, you'd add <ins class="adsbygoogle"...> blocks and push them
+      }
+    }
+    initAds();
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
+  <!-- App script: main functionality -->
+  <script>
+  // Libraries used:
+  // - PDFLib (global PDFLib)
+  // - pdf.js (global pdfjsLib)
+  // - Sortable (global Sortable)
+
+  (function(){
+
+    /* ---------- Utilities ---------- */
+    function fmtBytes(bytes){
+      if(bytes===0) return '0 B';
+      const k=1024, sizes=['B','KB','MB','GB'];
+      const i=Math.floor(Math.log(bytes)/Math.log(k));
+      return (bytes/Math.pow(k,i)).toFixed(2) + ' ' + sizes[i];
+    }
+
+    /* ---------- Image Compressor (client-side) ---------- */
+    const imgFilesInput = document.getElementById('imgFiles');
+    const imgDrop = document.getElementById('imgDrop');
+    const imgPreviewList = document.getElementById('imgPreviewList');
+    const imgOutputs = document.getElementById('imgOutputs');
+    const imgQuality = document.getElementById('imgQuality');
+    const imgQVal = document.getElementById('imgQVal');
+    const imgFormat = document.getElementById('imgFormat');
+    const imgMaxW = document.getElementById('imgMaxW');
+    const imgCompressAll = document.getElementById('imgCompressAll');
+
+    let imageFiles = [];
+
+    imgQVal.textContent = imgQuality.value;
+    imgQuality.addEventListener('input', ()=> imgQVal.textContent = imgQuality.value);
+
+    imgFilesInput.addEventListener('change', e => handleImageFiles(Array.from(e.target.files)));
+
+    ['dragenter','dragover'].forEach(ev => imgDrop.addEventListener(ev, e=>{e.preventDefault(); imgDrop.style.borderColor='var(--accent1)'}));
+    ['dragleave','drop'].forEach(ev => imgDrop.addEventListener(ev, e=>{e.preventDefault(); imgDrop.style.borderColor=''}));
+    imgDrop.addEventListener('drop', e => {
+      e.preventDefault();
+      const dt = e.dataTransfer;
+      const dropped = Array.from(dt.files).filter(f => f.type.startsWith('image/'));
+      handleImageFiles(dropped);
+    });
+
+    function handleImageFiles(list){
+      list.forEach(file => {
+        const idx = imageFiles.push(file) - 1;
+        const el = document.createElement('div'); el.className='preview';
+        const img = document.createElement('img'); img.alt = file.name;
+        const meta = document.createElement('div'); meta.style.flex='1';
+        const n = document.createElement('div'); n.textContent = file.name;
+        const s = document.createElement('div'); s.className='small muted'; s.textContent = fmtBytes(file.size);
+        const actions = document.createElement('div'); actions.style.marginTop='8px';
+        const btnC = document.createElement('button'); btnC.className='btn'; btnC.textContent='Compress'; btnC.onclick = ()=> compressImage(idx);
+        const btnR = document.createElement('button'); btnR.className='btn'; btnR.style.background='#ef4444'; btnR.style.marginLeft='8px'; btnR.textContent='Remove'; btnR.onclick = ()=> { imageFiles[idx]=null; el.remove(); };
+        actions.appendChild(btnC); actions.appendChild(btnR);
+        meta.appendChild(n); meta.appendChild(s); meta.appendChild(actions);
+        el.appendChild(img); el.appendChild(meta);
+        imgPreviewList.appendChild(el);
+        const fr = new FileReader(); fr.onload = e => img.src = e.target.result; fr.readAsDataURL(file);
+      });
+    }
+
+    async function imageToBlob(file, desiredType, qualityNum, maxWidth){
+      return new Promise((resolve,reject)=>{
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = ()=>{
+          let w = img.naturalWidth, h = img.naturalHeight;
+          if(maxWidth>0 && w>maxWidth){ h = Math.round(h * (maxWidth/w)); w = maxWidth; }
+          const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img,0,0,w,h);
+          // if original and PNG and user wants original, use file directly
+          const outType = desiredType==='original' ? (file.type || 'image/jpeg') : desiredType;
+          // convert to chosen type
+          canvas.toBlob(blob => { URL.revokeObjectURL(url); resolve(blob); }, outType, qualityNum/100);
+        };
+        img.onerror = err => { URL.revokeObjectURL(url); reject(err); };
+        img.src = url;
+      });
+    }
+
+    async function compressImage(idx){
+      const file = imageFiles[idx];
+      if(!file) return alert('File not found');
+      const desired = imgFormat.value;
+      const q = parseInt(imgQuality.value,10);
+      const mw = parseInt(imgMaxW.value,10) || 0;
+      try{
+        const blob = await imageToBlob(file, desired, q, mw);
+        const a = document.createElement('a'); a.style.display='inline-block'; a.style.marginRight='8px';
+        a.href = URL.createObjectURL(blob);
+        const ext = desired.includes('webp') ? '.webp' : desired.includes('png') ? '.png' : '.jpg';
+        a.download = file.name.replace(/\.[^.]+$/,'') + ext;
+        a.textContent = 'Download ' + a.download + ' (' + fmtBytes(blob.size) + ')';
+        imgOutputs.appendChild(a);
+      }catch(e){ console.error(e); alert('Error compressing image: ' + e.message); }
+    }
+
+    imgCompressAll.addEventListener('click', async ()=>{
+      imgOutputs.innerHTML = '';
+      const items = Array.from(imgPreviewList.children);
+      if(items.length===0) return alert('Add images first');
+      for(const it of items){
+        const idx = parseInt(it.dataset.idx || Array.from(imgPreviewList.children).indexOf(it),10);
+        if(!imageFiles[idx]) continue;
+        await compressImage(idx);
+      }
+    });
+
+    /* ---------- PDF Toolbox (client-side features using pdf-lib & pdf.js) ---------- */
+    const pdfFilesInput = document.getElementById('pdfFiles');
+    const pdfStatus = document.getElementById('pdfStatus');
+    const pdfPreviewArea = document.getElementById('pdfPreviewArea');
+
+    let pdfFiles = []; // {file, arrayBuffer, pdfDoc (pdf-lib), pages: [{thumbBlob, pageIndex}]}
+
+    pdfFilesInput.addEventListener('change', async e => {
+      await loadPdfFiles(Array.from(e.target.files));
+    });
+
+    async function loadPdfFiles(list){
+      pdfPreviewArea.innerHTML = ''; pdfFiles = [];
+      if(!list || list.length===0){ pdfStatus.textContent = 'No PDF loaded'; return; }
+      pdfStatus.textContent = 'Loading PDFs...';
+      for(const f of list){
+        try{
+          const ab = await f.arrayBuffer();
+          const pdfDoc = await PDFLib.PDFDocument.load(ab);
+          // store info
+          pdfFiles.push({file:f, arrayBuffer:ab, pdfDoc});
+          // create UI row
+          const row = document.createElement('div'); row.className='preview'; row.style.marginBottom='8px';
+          const meta = document.createElement('div'); meta.style.flex='1';
+          const name = document.createElement('div'); name.textContent = f.name;
+          const size = document.createElement('div'); size.className='small muted'; size.textContent = fmtBytes(f.size);
+          const actions = document.createElement('div'); actions.style.marginTop='8px';
+          const btnOpen = document.createElement('button'); btnOpen.className='btn-secondary'; btnOpen.textContent='Open Organizer'; btnOpen.onclick = ()=> openOrganizerFor(f.name);
+          actions.appendChild(btnOpen);
+          meta.appendChild(name); meta.appendChild(size); meta.appendChild(actions);
+          row.appendChild(meta);
+          pdfPreviewArea.appendChild(row);
+        }catch(err){ console.error('failed load pdf', err); alert('Failed to load ' + f.name + ': ' + err.message); }
+      }
+      pdfStatus.textContent = pdfFiles.length + ' PDF(s) loaded';
+    }
+
+    /* ---------- Merge PDFs ---------- */
+    document.getElementById('mergeSelected').addEventListener('click', async ()=>{
+      if(pdfFiles.length<2) return alert('Select at least 2 PDFs (use Choose PDFs).');
+      try{
+        const mergedDoc = await PDFLib.PDFDocument.create();
+        for(const p of pdfFiles){
+          const donor = await PDFLib.PDFDocument.load(p.arrayBuffer);
+          const donorPages = await mergedDoc.copyPages(donor, donor.getPageIndices());
+          donorPages.forEach(pg => mergedDoc.addPage(pg));
+        }
+        const mergedBytes = await mergedDoc.save();
+        const blob = new Blob([mergedBytes], {type:'application/pdf'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'merged.pdf'; a.textContent = 'Download merged.pdf ('+fmtBytes(blob.size)+')'; a.className='btn'; a.style.display='inline-block'; a.style.marginTop='10px';
+        pdfPreviewArea.appendChild(a);
+      }catch(err){ console.error(err); alert('Error merging PDFs: ' + err.message); }
+    });
+
+    /* ---------- Organizer Modal (reorder, split, rotate, watermark, add page numbers, compress) ---------- */
+    const modalRoot = document.getElementById('modalRoot');
+
+    function showModal(innerHtml, onClose){
+      modalRoot.innerHTML = '';
+      modalRoot.style.display = 'flex';
+      const wrap = document.createElement('div'); wrap.className='modal';
+      const card = document.createElement('div'); card.className='modal-card';
+      card.innerHTML = innerHtml;
+      const btnClose = document.createElement('button'); btnClose.className='btn-secondary'; btnClose.textContent='Close'; btnClose.style.marginTop='12px';
+      btnClose.onclick = ()=> { modalRoot.style.display='none'; modalRoot.innerHTML=''; if(onClose) onClose(); };
+      card.appendChild(btnClose);
+      wrap.appendChild(card);
+      modalRoot.appendChild(wrap);
+    }
+
+    async function openOrganizerFor(filename){
+      // find pdf
+      const pdfObj = pdfFiles.find(p=>p.file.name===filename);
+      if(!pdfObj) return alert('PDF not found');
+      // We will render thumbnails using pdf.js for organization
+      const tmpUrl = URL.createObjectURL(new Blob([pdfObj.arrayBuffer],{type:'application/pdf'}));
+      // load pdf.js
+      const loadingTask = pdfjsLib.getDocument({data:pdfObj.arrayBuffer});
+      const pdf = await loadingTask.promise;
+      const pageCount = pdf.numPages;
+      // build modal content
+      let inner = '<h3>Organizer — ' + filename + '</h3>';
+      inner += '<div class="notice">Drag to reorder pages. Use the actions below to rotate/delete or export PDF.</div>';
+      inner += '<div id="pageGrid" class="grid-pages" style="margin-top:12px"></div>';
+      inner += '<div style="margin-top:12px" class="row gap spaced"><div><button id="exportOrganized" class="btn">Export PDF</button> <button id="splitSelected" class="btn-secondary">Split into pages</button></div><div><label class="small">Add watermark: <input id="watermarkText" type="text" placeholder="Confidential"></label></div></div>';
+      showModal(inner);
+
+      const pageGrid = document.getElementById('pageGrid');
+      const thumbs = [];
+
+      for(let i=1;i<=pageCount;i++){
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({scale:1.2});
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width; canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        await page.render({canvasContext:ctx, viewport}).promise;
+        // convert canvas to blob url
+        const dataUrl = canvas.toDataURL('image/png');
+        const card = document.createElement('div'); card.className='page-thumb'; card.dataset.p = i-1;
+        const im = document.createElement('img'); im.src = dataUrl; im.alt = 'Page ' + i;
+        const lab = document.createElement('div'); lab.textContent = 'Page ' + i; lab.style.fontSize='0.85rem'; lab.style.marginTop='6px';
+        const actions = document.createElement('div'); actions.style.marginTop='6px';
+        const btnRotateL = document.createElement('button'); btnRotateL.textContent='⟲'; btnRotateL.className='btn-secondary'; btnRotateL.style.marginRight='6px';
+        const btnRotateR = document.createElement('button'); btnRotateR.textContent='⟳'; btnRotateR.className='btn-secondary';
+        const btnDel = document.createElement('button'); btnDel.textContent='Delete'; btnDel.className='btn'; btnDel.style.background='#ef4444'; btnDel.style.marginLeft='6px';
+        actions.appendChild(btnRotateL); actions.appendChild(btnRotateR); actions.appendChild(btnDel);
+        card.appendChild(im); card.appendChild(lab); card.appendChild(actions);
+        pageGrid.appendChild(card);
+
+        // store thumb
+        thumbs.push({canvasDataUrl:dataUrl, pageIndex:i-1, rotate:0, deleted:false});
+        // wire up delete & rotate handlers (these update thumbs array)
+        btnDel.addEventListener('click', ()=> { thumbs[i-1].deleted = true; card.style.opacity='0.4'; });
+        btnRotateL.addEventListener('click', ()=> { thumbs[i-1].rotate = (thumbs[i-1].rotate-90)%360; card.style.transform = `rotate(${thumbs[i-1].rotate}deg)`; });
+        btnRotateR.addEventListener('click', ()=> { thumbs[i-1].rotate = (thumbs[i-1].rotate+90)%360; card.style.transform = `rotate(${thumbs[i-1].rotate}deg)`; });
+      }
+
+      // enable drag-reorder
+      Sortable.create(pageGrid, { animation: 150 });
+
+      // export organized PDF
+      document.getElementById('exportOrganized').addEventListener('click', async ()=>{
+        const children = Array.from(pageGrid.children);
+        // compute new order and apply deletions
+        const ordered = children.map(c => parseInt(c.dataset.p,10)).filter((idx,i)=> !thumbs[idx].deleted);
+        // create new PDF using pdf-lib by copying pages in new order and applying transformations if requested
+        try{
+          const outPdf = await PDFLib.PDFDocument.create();
+          const src = await PDFLib.PDFDocument.load(pdfObj.arrayBuffer);
+          for(const orderIdx of ordered){
+            const [copied] = await outPdf.copyPages(src, [orderIdx]);
+            outPdf.addPage(copied);
+          }
+          // optionally add watermark
+          const wtext = (document.getElementById('watermarkText')||{}).value || '';
+          if(wtext){
+            const pages = outPdf.getPages();
+            pages.forEach(pg => {
+              const {width,height} = pg.getSize();
+              pg.drawText(wtext, { x: width/5, y: height/2, size:30, color: PDFLib.rgb(0.75,0.75,0.75), rotate: PDFLib.degrees(-45), opacity:0.25 });
+            });
+          }
+          const bytes = await outPdf.save();
+          const blob = new Blob([bytes], {type:'application/pdf'});
+          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'organized-'+pdfObj.file.name; a.textContent='Download organized PDF ('+fmtBytes(blob.size)+')'; a.className='btn'; a.style.display='inline-block'; a.style.marginTop='12px';
+          document.querySelector('.modal-card').appendChild(a);
+        }catch(e){ console.error(e); alert('Export failed: ' + e.message); }
+      });
+
+      // split into single pages
+      document.getElementById('splitSelected').addEventListener('click', async ()=>{
+        try{
+          const src = await PDFLib.PDFDocument.load(pdfObj.arrayBuffer);
+          for(let i=0;i<src.getPageCount();i++){
+            const doc = await PDFLib.PDFDocument.create();
+            const [pg] = await doc.copyPages(src,[i]);
+            doc.addPage(pg);
+            const bytes = await doc.save();
+            const blob = new Blob([bytes], {type:'application/pdf'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = pdfObj.file.name.replace('.pdf','') + '-page-'+(i+1)+'.pdf';
+            a.textContent = 'Download page ' + (i+1);
+            a.style.display='inline-block'; a.style.marginRight='8px';
+            document.querySelector('.modal-card').appendChild(a);
+          }
+        }catch(e){ console.error(e); alert('Split failed: ' + e.message); }
+      });
+    }
+
+    /* ---------- Compress PDF (lossy approach) ----------
+      Approach: Render each page via pdf.js to canvas at reduced scale, convert canvas image to JPEG, and rebuild PDF with those images.
+      This is lossy but reduces PDF size for scanned/image-heavy PDFs.
+    */
+    async function compressPdf(pdfObj, scaleFactor=1.0, jpegQuality=0.6){
+      try{
+        const src = await pdfjsLib.getDocument({data:pdfObj.arrayBuffer}).promise;
+        const outDoc = await PDFLib.PDFDocument.create();
+        for(let i=1;i<=src.numPages;i++){
+          const page = await src.getPage(i);
+          const vp = page.getViewport({scale:1 * scaleFactor});
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.floor(vp.width); canvas.height = Math.floor(vp.height);
+          const ctx = canvas.getContext('2d');
+          await page.render({canvasContext:ctx, viewport:vp}).promise;
+          // convert canvas to JPG blob
+          const dataUrl = canvas.toDataURL('image/jpeg', jpegQuality);
+          // embed as image in pdf-lib
+          const jpgBytes = dataURLToUint8Array(dataUrl);
+          const jpgImage = await outDoc.embedJpg(jpgBytes);
+          const pageNew = outDoc.addPage([jpgImage.width, jpgImage.height]);
+          pageNew.drawImage(jpgImage, {x:0,y:0,width:jpgImage.width, height:jpgImage.height});
+        }
+        const outBytes = await outDoc.save();
+        return new Blob([outBytes], {type:'application/pdf'});
+      }catch(e){ throw e; }
+    }
+
+    function dataURLToUint8Array(dataUrl){
+      const base64 = dataUrl.split(',')[1];
+      const raw = atob(base64);
+      const u8 = new Uint8Array(raw.length);
+      for(let i=0;i<raw.length;i++) u8[i]=raw.charCodeAt(i);
+      return u8;
+    }
+
+    /* ---------- PDF -> JPG (render pages and make downloadable images) ---------- */
+    async function pdfToJpg(pdfObj){
+      try{
+        const pdf = await pdfjsLib.getDocument({data:pdfObj.arrayBuffer}).promise;
+        const container = document.createElement('div');
+        container.innerHTML = '<h4>Exported images:</h4>';
+        for(let i=1;i<=pdf.numPages;i++){
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({scale:1.5});
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width; canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d');
+          await page.render({canvasContext:ctx, viewport}).promise;
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+          const a = document.createElement('a'); a.href = dataUrl; a.download = pdfObj.file.name.replace('.pdf','') + '-page-' + i + '.jpg';
+          a.textContent = 'Download page ' + i;
+          a.style.display='inline-block'; a.style.marginRight='8px';
+          container.appendChild(a);
+        }
+        document.getElementById('pdfPreviewArea').appendChild(container);
+      }catch(e){ console.error(e); alert('pdf->jpg failed: ' + e.message); }
+    }
+
+    /* ---------- Wire up left nav buttons ---------- */
+    document.getElementById('toolsList').addEventListener('click', e => {
+      if(!e.target.dataset.tool) return;
+      const tool = e.target.dataset.tool;
+      switch(tool){
+        case 'merge': alert('Open PDFs via Choose PDFs then click Merge Selected.'); break;
+        case 'split': alert('Load a PDF and use Organizer > Split into pages.'); break;
+        case 'compressPdf': {
+          if(pdfFiles.length===0) return alert('Load a PDF first (Choose PDFs).');
+          // compress first PDF as demo
+          (async ()=>{
+            try{
+              const p = pdfFiles[0];
+              const blob = await compressPdf(p, 0.9, 0.6);
+              const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'compressed-'+p.file.name; a.textContent = 'Download compressed PDF ('+fmtBytes(blob.size)+')'; a.className='btn'; a.style.display='inline-block'; a.style.marginTop='8px';
+              pdfPreviewArea.appendChild(a);
+            }catch(e){ console.error(e); alert('Compress PDF failed: ' + e.message); }
+          })();
+        } break;
+        case 'organize': alert('Load a PDF and click Open Organizer in quick actions.'); break;
+        case 'repair': alert('Repair requires server-side logic. See the note in UI about server APIs.'); break;
+        case 'convert': alert('Convert to PDF: use Image→PDF or Office→PDF (Office conversions need server).'); break;
+        case 'word2pdf':
+        case 'ppt2pdf':
+        case 'excel2pdf':
+          alert('Office→PDF conversions typically require server-side conversion (LibreOffice or cloud API). Use a server endpoint and upload files there.'); break;
+        case 'jpg2pdf': alert('Use Image → PDF (select images) which creates a PDF from images in-browser.'); break;
+        case 'image2pdf': alert('Use the Image Compressor area to convert images to PDF — or use Image→PDF function (coming).'); break;
+        case 'pdf2word':
+        case 'pdf2ppt':
+        case 'pdf2excel':
+          alert('PDF→Office conversions require server-side conversion for good fidelity (suggestion: use cloud APIs or LibreOffice headless on server).'); break;
+        case 'pdf2jpg':
+          if(pdfFiles.length===0) return alert('Load a PDF first.');
+          pdfToJpg(pdfFiles[0]);
+          break;
+        case 'pdfa': alert('PDF/A creation typically requires server-side validation and embedding fonts; for now use Export in Organizer and validate using external tool.'); break;
+        case 'edit': alert('Basic editing (draw text) available via Organizer > Export and re-add. For complex WYSIWYG editing we recommend a rich editor integration.'); break;
+        case 'pageNumbers': alert('Open Organizer and use "Add watermark" area; a dedicated page-numbering tool will be added (server not required).'); break;
+        case 'watermark': alert('Use Organizer to add watermark text when exporting.'); break;
+        case 'rotate': alert('Open Organizer and rotate pages using rotate buttons on thumbnails.'); break;
+        case 'annotate': alert('Annotation (sticky notes, highlights) requires a small editor; can be added with a JS library—ask me and I will add it.'); break;
+        case 'protect':
+        case 'unlock':
+          alert('Protect/Unlock with passwords is not supported client-side in this demo (needs server or specialized library).'); break;
+        case 'scan': alert('Scan to PDF requires camera access — this can be added as a feature (camera capture -> image -> PDF).'); break;
+        case 'sign': alert('Digital signatures require a signing backend or client certificate support; for simple visual signatures we can implement client-side image stamping.'); break;
+        case 'compare': alert('Compare PDF: Not implemented in-browser in this demo. A visual diff mode can be added with page render comparisons.'); break;
+        case 'headersFooters': alert('Organizer export allows watermarks and can be extended to headers/footers.'); break;
+        case 'organizer': alert('Organizer available via Quick Action > Open Organizer'); break;
+        case 'gdrive':
+        case 'dropbox':
+          alert('Drive/Dropbox integrations need OAuth keys; I can add client-side picker examples — you must register the app with each provider.'); break;
+        case 'apps': alert('Desktop & Mobile apps require packaging the tool into Electron/Capacitor.'); break;
+      }
+    });
+
+    /* ---------- Organizer quick open button ---------- */
+    document.getElementById('openOrganizer').addEventListener('click', ()=>{
+      if(pdfFiles.length===0) return alert('Load a PDF first (Choose PDFs).');
+      openOrganizerFor(pdfFiles[0].file.name);
+    });
+
+    // Small helper: Open Image Compressor or PDF toolbox
+    document.getElementById('openImageCompressor').addEventListener('click', ()=> {
+      document.getElementById('imageCompressorPanel').scrollIntoView({behavior:'smooth'});
+    });
+    document.getElementById('openPdfUploader').addEventListener('click', ()=> {
+      document.getElementById('pdfFiles').click();
+    });
+
+    // Utility: convert existing images to a single PDF
+    async function imagesToPdf(files){
+      try{
+        const doc = await PDFLib.PDFDocument.create();
+        for(const f of files){
+          const arr = await f.arrayBuffer();
+          // embed based on type
+          const fnLower = f.type.toLowerCase();
+          if(fnLower.includes('png')){
+            const img = await doc.embedPng(new Uint8Array(arr));
+            const page = doc.addPage([img.width, img.height]);
+            page.drawImage(img, {x:0,y:0,width:img.width,height:img.height});
+          }else{
+            const img = await doc.embedJpg(new Uint8Array(arr));
+            const page = doc.addPage([img.width, img.height]);
+            page.drawImage(img, {x:0,y:0,width:img.width,height:img.height});
+          }
+        }
+        const bytes = await doc.save();
+        return new Blob([bytes], {type:'application/pdf'});
+      }catch(e){ throw e; }
+    }
+
+    // Quick image->pdf action if user clicks tool (we add file chooser)
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+      if(btn.dataset.tool === 'image2pdf' || btn.dataset.tool === 'jpg2pdf'){
+        btn.addEventListener('click', ()=> {
+          const inp = document.createElement('input'); inp.type='file'; inp.accept='image/*'; inp.multiple=true;
+          inp.onchange = async (e)=> {
+            const fls = Array.from(e.target.files);
+            if(fls.length===0) return;
+            try{
+              const blob = await imagesToPdf(fls);
+              const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'images-to-pdf.pdf'; a.textContent = 'Download PDF ('+fmtBytes(blob.size)+')'; a.className='btn'; a.style.display='inline-block';
+              pdfPreviewArea.appendChild(a);
+            }catch(err){ console.error(err); alert('Image→PDF failed: ' + err.message); }
+          };
+          inp.click();
+        });
+      }
+    });
+
+    // PDF -> JPG quick hookup for the tool button (if user clicks left nav "PDF to JPG")
+    // It's wired in the switch above.
+
+    /* ---------- End of main app IIFE ---------- */
+  })();
+  </script>
+</body>
+</html>
+
